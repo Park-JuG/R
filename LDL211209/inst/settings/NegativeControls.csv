@@ -1,0 +1,91 @@
+targetId,comparatorId,outcomeId,outcomeName,type
+1141,1142,378256,Abnormal reflex,outcome
+1141,1142,440424,Aphasia,outcome
+1141,1142,439237,Assault,outcome
+1141,1142,378424,Astigmatism,outcome
+1141,1142,261880,Atelectasis,outcome
+1141,1142,134118,Atrophic condition of skin,outcome
+1141,1142,4224118,Bladder dysfunction,outcome
+1141,1142,80509,Bone cyst,outcome
+1141,1142,434626,Borderline personality disorder,outcome
+1141,1142,438407,Bulimia nervosa,outcome
+1141,1142,134765,Cachexia,outcome
+1141,1142,4172458,Candidiasis of skin,outcome
+1141,1142,436740,Cervical incompetence,outcome
+1141,1142,381581,Chalazion,outcome
+1141,1142,4307254,Closed fracture,outcome
+1141,1142,4047787,Colles' fracture,outcome
+1141,1142,198075,Condyloma acuminatum of the anogenital region,outcome
+1141,1142,73302,Curvature of spine,outcome
+1141,1142,4242416,Cutis laxa,outcome
+1141,1142,433163,Deficiency of macronutrients,outcome
+1141,1142,4047269,Deformity of foot,outcome
+1141,1142,133228,Dental caries,outcome
+1141,1142,4147672,Disease due to Papilloma virus,outcome
+1141,1142,4153380,Disorder of carotid artery,outcome
+1141,1142,4140510,Disorder of lymphatic vessel,outcome
+1141,1142,433440,Dysthymia,outcome
+1141,1142,376132,Ectropion,outcome
+1141,1142,440695,Encopresis,outcome
+1141,1142,438872,Excessive eating - polyphagia,outcome
+1141,1142,78804,Fibrocystic disease of breast,outcome
+1141,1142,4131595,Fracture of radius,outcome
+1141,1142,74855,Genital herpes simplex,outcome
+1141,1142,441788,Human papilloma virus infection,outcome
+1141,1142,76737,Hydrocele,outcome
+1141,1142,4029582,Hyperandrogenization syndrome,outcome
+1141,1142,195212,Hypercortisolism,outcome
+1141,1142,438134,Hypersomnia,outcome
+1141,1142,140362,Hypoparathyroidism,outcome
+1141,1142,4322737,Infection of tooth,outcome
+1141,1142,4207688,Infectious enteritis,outcome
+1141,1142,79072,Inflammatory disorder of breast,outcome
+1141,1142,139099,Ingrowing nail,outcome
+1141,1142,4288544,Inguinal hernia,outcome
+1141,1142,444191,Injury of face,outcome
+1141,1142,444130,Injury of foot,outcome
+1141,1142,134222,Injury of forearm,outcome
+1141,1142,4029966,Intracranial aneurysm,outcome
+1141,1142,437409,Intracranial injury,outcome
+1141,1142,4297984,Local infection of wound,outcome
+1141,1142,4018050,Localized infection,outcome
+1141,1142,439840,Lymphangitis,outcome
+1141,1142,4163232,Mastitis,outcome
+1141,1142,440389,Mental retardation,outcome
+1141,1142,436100,Narcolepsy,outcome
+1141,1142,4262178,Neurogenic dysfunction of the urinary bladder,outcome
+1141,1142,193874,Nocturnal enuresis,outcome
+1141,1142,4171549,Nodular goiter,outcome
+1141,1142,442274,Oligomenorrhea,outcome
+1141,1142,4215978,Onychomycosis,outcome
+1141,1142,4171915,Orchitis,outcome
+1141,1142,380731,Otitis externa,outcome
+1141,1142,378160,Otorrhea,outcome
+1141,1142,192606,Paraplegia,outcome
+1141,1142,253796,Pneumothorax,outcome
+1141,1142,195501,Polycystic ovaries,outcome
+1141,1142,4153877,Post-traumatic wound infection,outcome
+1141,1142,434319,Premature ejaculation,outcome
+1141,1142,373478,Presbyopia,outcome
+1141,1142,199876,Prolapse of female genital organs,outcome
+1141,1142,4295888,Prolapse of intestine,outcome
+1141,1142,194997,Prostatitis,outcome
+1141,1142,4146239,Pruritus of genital organs,outcome
+1141,1142,4285569,Pupillary disorder,outcome
+1141,1142,81336,Rectal prolapse,outcome
+1141,1142,380395,Retinal dystrophy,outcome
+1141,1142,141825,Simple goiter,outcome
+1141,1142,137054,Skin striae,outcome
+1141,1142,434630,Sleep-wake schedule disorder,outcome
+1141,1142,4195698,Tenosynovitis,outcome
+1141,1142,4339088,Testicular mass,outcome
+1141,1142,133141,Tinea pedis,outcome
+1141,1142,440814,Torticollis,outcome
+1141,1142,435140,Toxic effect of alcohol,outcome
+1141,1142,4270490,Tracheitis,outcome
+1141,1142,4028970,Tracheobronchitis,outcome
+1141,1142,193326,Urge incontinence of urine,outcome
+1141,1142,4092565,Uterine prolapse,outcome
+1141,1142,140641,Verruca vulgaris,outcome
+1141,1142,197036,Vesicoureteric reflux,outcome
+1141,1142,261326,Viral pneumonia,outcome

@@ -1,0 +1,34 @@
+DBMS:
+postgresql
+
+Error:
+org.postgresql.util.PSQLException: ERROR: current transaction is aborted, commands ignored until end of transaction block
+
+SQL:
+SELECT DISTINCT(person_id), 'Yes' AS myocardial_infarction  
+                        FROM cdmpv531_kdh.CONDITION_OCCURRENCE 
+                        WHERE (condition_concept_id = 312327 or condition_concept_id= 314666 or condition_concept_id=4108217) 
+                        AND person_id IN (SELECT person_id FROM cdmpv531_kdh.MEASUREMENT WHERE measurement_concept_id = 3028437);
+
+R version:
+R version 3.6.3 (2020-02-29)
+
+Platform:
+x86_64-w64-mingw32
+
+Attached base packages:
+- stats
+- graphics
+- grDevices
+- utils
+- datasets
+- methods
+- base
+
+Other attached packages:
+- SqlRender (1.7.0)
+- FeatureExtraction (3.1.0)
+- Andromeda (0.4.0)
+- dplyr (1.0.5)
+- evidnet (0.0.1)
+- DatabaseConnector (3.0.0)
