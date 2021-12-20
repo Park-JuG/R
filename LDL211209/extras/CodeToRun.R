@@ -67,6 +67,9 @@ data
 
 write.csv(c, "C:\\Users\\user\\Documents\\LDL_MYOCARDIAL_INFARCTION_happens.csv")
 
+
+
+
 '
 이제부터 공변량을 구하도록 하자.
 가장 먼저 코호트를 생성하기 위한 SQL을 만들어 실행했다.
