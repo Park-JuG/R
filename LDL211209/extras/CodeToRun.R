@@ -61,15 +61,31 @@ myo는 심근 경색이 발생한 환자들만을 추출한 데이터이기 때�
 합친 이후, 심근경색이 발생하지 않은 환자들은 MYOCARDIAL_INFARCTION란에 결측값이 나오기 때문에 결측값을 NO라고 변경해 주었다.
 '
 
-data <- full_join(people, myo, by="PERSON_ID")
-data$MYOCARDIAL_INFARCTION[is.na(data$MYOCARDIAL_INFARCTION)] <- "NO"
-data
+myo_data <- left_join(people, myo, by="PERSON_ID")
+myo_data$MYOCARDIAL_INFARCTION[is.na(myo_data$MYOCARDIAL_INFARCTION)] <- "NO"
+myo_data
 
-write.csv(c, "C:\\Users\\user\\Documents\\LDL_MYOCARDIAL_INFARCTION_happens.csv")
-
-
+write.csv(myo_data, "C:\\Users\\user\\Documents\\LDL_MYOCARDIAL_INFARCTION_happens.csv")
 
 
+#사망자 데이터 구하기
+'
+LDL이 있던 환자들 중 사망한 환자들과 사망하지 않은 환자들을 구하기 위해 LDL에 해당하는 환자들의 id로 DEATH 테이블에서 환자 ID와 함께 YES라는 데이터를 추출하도록 했다.
+이후, people 데이터에 환자 ID를 기준으로 death 데이터를 왼쪽 조인 하고 YES값이 없는 데이터에 NO라는 값이 나오도록 하여
+death 속성에서 환자들의 사망 여부를 볼 수 있게 했다.
+'
+death <- querySql(conn,"SELECT person_id, 'YES' AS death
+                        FROM cdmpv531_kdh.DEATH 
+                        WHERE person_id IN (SELECT person_id FROM cdmpv531_kdh.MEASUREMENT WHERE measurement_concept_id = 3028437)")
+
+death_data <- left_join(people, death, by="PERSON_ID")
+death_data$DEATH[is.na(death_data$DEATH)] <- "NO"
+head(death_data)
+
+
+
+
+#공변량 구하기
 '
 이제부터 공변량을 구하도록 하자.
 가장 먼저 코호트를 생성하기 위한 SQL을 만들어 실행했다.
@@ -233,8 +249,45 @@ head(LongTerm) # day -365 through 0
 
 
 
+#데이터 셋 만들기
+'
+LDL 데이터와 공변량 데이터, outcome 데이터를 이용해 필요한 데이터 셋을 만들 것이다.
+LDL 데이터는 measurement_date로 인해 중복되는 데이터가 있기에 따로 데이터셋을 만들 것이고,
+공변량 데이터와 outcome 데이터는 합쳐서 하나의 데이터 셋으로 만들 것이다.
+
+LDL 데이터를 데이터 셋으로 만들기에 앞서 LDL이 어떤 구조의 자료인지 확인하기로 하자.
+'
+class(LDL) #data.frame
+
+'
+LDL 데이터는 이미 data.frame 형태로 구성되어 있어, 따로 자료 구조를 변경하지 않았다.
+
+이제 공변량 데이터와 outcome 데이터를 합쳐서 하나의 데이터셋으로 만들자.
+먼저 공변량 데이터들끼리 조인시키자.
+실제 나이값 공변량과 연령 그룹별 공변량, 성별 공변량, 장기 공변량, 단기 공변량을 먼저 조인시켜 공변량 데이터 셋을 만들었다.
+이후, 공변량 속성명으로 어느 속성을 의미하는 것인지 몰라 rename 함수로 속성명을 변경했다.
+그리고 잘 변경되었는지 확인했다.
+'
+cov_data <- age_year_data %>% inner_join(age_data, by="rowId") %>% inner_join(gender_data, by="rowId") %>% 
+                              left_join(long_term_data, by="rowId") %>% left_join(short_term_data, by="rowId")
+
+cov_data <- rename(cov_data, ageYearCovariateId = covariateId.x, ageYearCovValue = covariateValue.x,
+                             ageCovariateId = covariateId.y, ageCovValue = covariateValue.y,
+                             genderCovariateId = covariateId.x.x, genderCovValue = covariateValue.x.x,
+                             longTermCovariateId = covariateId.y.y, longTermCovValue = covariateValue.y.y,
+                             shortTermCovariateId = covariateId, shortTermCovValue = covariateValue)
+head(cov_data)
+
+'
+이후, 만들어진 공변량 데이터셋에 left 조인으로 앞서 구한 데이터인 심근경색 데이터와 사망자 데이터를 rowId와 PERSON_ID를 기준으로 합쳤다.
+잘 합쳐졌는지 확인하고 str() 함수로 어떤 자료구조 형태를 띄는지 확인했다.
+out_cov_data 역시 data.frame 형태로 구성되어 있었기 때문에 자료 구조를 변경하지 않았다.
+'
+out_cov_data <- cov_data %>% left_join(myo_data, by=c("rowId" = "PERSON_ID")) %>% left_join(death_data, by=c("rowId" = "PERSON_ID"))
+head(out_cov_data)
+str(out_cov_data)
 
 
-
-
-
+'
+이로써 LDL 데이터셋과 공변량_결과 데이터셋이 만들어졌다.
+'
