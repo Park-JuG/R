@@ -291,3 +291,220 @@ str(out_cov_data)
 '
 이로써 LDL 데이터셋과 공변량_결과 데이터셋이 만들어졌다.
 '
+
+
+
+
+# LDL 그룹 나누고 분석하기
+'
+LDL 그룹을 LDL 수치의 분산이 높은 그룹과 LDL 수치의 분산이 낮은 그룹으로 낮은 그룹으로 나눌 것이다.
+그러기에 앞서 분산을 성공적으로 얻기 위해 데이터가 하나인 사람을 제외하고 분산을 구한 뒤,
+분산의 중위값을 구할 것이다. 
+'
+
+# 데이터가 하나인 사람 제외
+LDL2 <- LDL %>% group_by(PERSON_ID) %>% summarise(n=n())
+LDL2 <- LDL2 %>% filter(n!=1)
+LDL2 <- inner_join(LDL2, LDL, by="PERSON_ID")
+LDL2 <- LDL2 %>% select(PERSON_ID, MEASUREMENT_ID, MEASUREMENT_DATE, VALUE_AS_NUMBER)
+head(LDL2)
+
+# 사람별 LDL 분산 구하기
+LDL_var <- LDL2 %>% group_by(PERSON_ID) %>% summarise(var = var(VALUE_AS_NUMBER))
+LDL_median <- LDL_var %>% summarise(median = median(var))
+LDL_median <- as.numeric(LDL_median) 
+LDL_median 
+
+
+# 중위값 기준으로 나누기
+higher <- LDL_var %>% filter(var >= LDL_median) %>% mutate(group = "Higher")
+lower <- LDL_var %>% filter(var < LDL_median) %>% mutate(group = "Lower")
+LDL_data <- rbind(higher, lower)
+LDL_data <- LDL_data %>% arrange(PERSON_ID)
+head(LDL_data)
+
+
+
+# 그룹별 비교
+'
+이제 LDL 수치 분산이 높은 그룹과 낮은 그룹별로 심근경색 발생, 사망자 수, 실제나이, 나이그룹, 성별에 차이가 있는지 확인할 수 있다.
+tableone 패키지를 사용할 것이다.
+'
+library(tableone)
+
+# 심근경색 비교
+# 데이터 생성
+myoVar_data <- inner_join(LDL_data, myo_data, by="PERSON_ID")
+head(myoVar_data)
+str(myoVar_data)
+
+
+# 비교분석
+'
+myoVars에 내가 비교할 데이터 속성명을 저장하고, catVars에 범주형 데이터 속성명을 저장하고 분석을 실시한다.
+비정규 데이터가 있을수 있으므로 먼저 계층별이 아닌 비교분석을 실시한 후, 비정규 데이터는 biomarkers 변수에 집어넣고 재분석한다.
+'
+dput(names(myoVar_data))
+myoVars <- c("var", "group","MYOCARDIAL_INFARCTION")
+catVars <- c("group","MYOCARDIAL_INFARCTION")
+myoTab <- CreateTableOne(vars=myoVars, data=myoVar_data, factorVars=catVars)
+myoTab
+
+myoTab <- CreateTableOne(vars=myoVars, strata = "group", data=myoVar_data, factorVars = catVars)
+biomarkers <- c("var")
+print(myoTab, nonnormal = biomarkers, formatOptions = list(big.mark = ",")) # 그룹별 심근경색 비교
+
+'결과는 p-value가 0.001보다 작으므로, 그룹별 심근경색 발생률은 차이가 존재한다고 할 수있다.'
+
+
+
+
+
+# 사망자 수 비교
+# 데이터 생성
+deathVar_data <- inner_join(LDL_data, death_data, by = "PERSON_ID")
+head(deathVar_data)
+str(deathVar_data)
+
+# 비교분석
+dput(names(deathVar_data))
+deathVars <- c("var", "group","DEATH")
+catVars <- c("group","DEATH")
+deathTab <- CreateTableOne(vars=deathVars, data=deathVar_data, factorVars=catVars)
+deathTab
+
+deathTab <- CreateTableOne(vars=deathVars, strata = "DEATH", data=deathVar_data, factorVars = catVars)
+biomarkers <- c("var")
+print(deathTab, nonnormal = biomarkers, formatOptions = list(big.mark = ",")) # 그룹별 사망자 비교
+
+'결과는 p-value가 0.001보다 작으므로, 그룹별 사망자 수에 차이가 존재할 수 있다고 할 수 있다.'
+
+
+
+
+
+
+# 그룹별 공변량 비교
+# 데이터 생성
+covVar <- inner_join(cov_data, LDL_data, by=c("rowId" = "PERSON_ID"))
+head(covVar)
+str(covVar)
+
+
+# 실제나이 비교
+ageYearVars <- c("var", "ageYearCovariateId", "ageYearCovValue", "group")
+catVars <- c("group", "ageYearCovariateId")
+ageYearTab <- CreateTableOne(vars=ageYearVars, data=covVar, factorVars=catVars)
+ageYearTab
+
+ageYearTab <- CreateTableOne(var=ageYearVars, strata = "group", data=covVar, factorVars = catVars)
+biomarkers <- c("var", "ageYearCovValue")
+print(ageYearTab, nonnormal=biomarkers, formatOptions = list(big.mark=",")) # 그룹별 실제나이비교
+'
+결과는 ageYearCovValue의 p-value가 0.722이므로 귀무가설을 기각하지 못한다.
+즉, 그룹별 실제나이의 차이는 크지 않는다고 할 수 있다.
+'
+
+
+
+# 나이그룹 비교
+ageVars <- c("var", "ageCovariateId", "ageCovValue", "group")
+catVars <- c("group", "ageCovariateId")
+ageTab <- CreateTableOne(vars=ageVars, data=covVar, factorVars=catVars)
+ageTab
+
+ageTab <- CreateTableOne(var=ageVars, strata = "group", data=covVar, factorVars = catVars)
+biomarkers <- c("var", "ageCovValue")
+print(ageTab, nonnormal = biomarkers, formatOptions = list(big.mark=",")) # 그룹별 나이그룹 비교
+'
+결과는 ageCovariateId의 p-value가 0.421로, 귀무가설을 기각하지 못함으로써,
+그룹별 나이그룹도 당연하게도 차이가 크지 않다고 할 수 있다.
+'
+
+
+# 성별 비교
+genderVars <- c("var", "genderCovariateId", "genderCovValue", "group")
+catVars <- c("group", "genderCovariateId")
+genderTab <- CreateTableOne(vars=genderVars, data=covVar, factorVars = catVars)
+genderTab
+
+
+genderTab <- CreateTableOne(var=genderVars, strata = "group", data=covVar, factorVars=catVars)
+biomarkers <- c("var","genderCovValue")
+print(genderTab, nonnormal=biomarkers, formatOptions=list(big.mark=",")) # 그룹별 성별 비교
+'
+결과는 genderCovariateId의 p-value가 0.619로, 귀무가설을 기각하지 못한다.
+즉, 그룹별 성별에도 큰 차이도 나지 않는다.
+'
+
+
+
+
+
+#kaplan-meier 분석
+library(survival)
+library(survminer)
+
+# 데이터 생성
+LDL3 <- LDL2 %>% group_by(PERSON_ID) %>% mutate(survTime = max(MEASUREMENT_DATE) - min(MEASUREMENT_DATE))
+survTime <- LDL3 %>% select(PERSON_ID, survTime) %>% unique()
+
+# 그룹별 사망자 생존곡선
+survData <- left_join(deathVar_data, survTime, by = "PERSON_ID")
+survData <- survData %>% mutate(DEATH = ifelse(survData$DEATH == "NO", 0, 1))
+str(survData)
+
+fit = survfit(Surv(survData$survTime, survData$DEATH)~group, data=survData)
+fit
+summary(fit)
+
+plot(fit, ylab="Survival", xlab="Days", ylim=c(0.8, 1.0), col=c("red","blue"), lty="solid", lwd = 1, mark.time=T)
+legend("bottomleft", legend=levels(group), col=c("red","blue"), lty="solid")
+
+
+# 그룹별 심근경색 발생 생존곡선
+survData2 <- left_join(myoVar_data, survTime, by="PERSON_ID")
+survData2 <- survData %>% mutate(MYOCARDIAL_INFARCTION = ifelse(survData2$MYOCARDIAL_INFARCTION == "NO",0,1))
+str(survData2)
+
+fit = survfit(Surv(survData2$survTime, survData2$MYOCARDIAL_INFARCTION)~group, data=survData2)
+fit
+summary(fit)
+
+plot(fit, ylab="Survival", xlab="Days", ylim=c(0.3, 1.0), col=c("red","blue"), lty="solid", lwd = 1, mark.time=T)
+legend("bottomleft", legend=levels(group), col=c("red","blue"), lty="solid")
+
+
+# 콕스 분석
+'콕스 분석은 독립변수에 group변수 뿐만 아니라 ageYearCovValue와 genderCovariateId를 추가해 분석할 것이다.'
+
+# 사망자 콕스 분석
+survData <- survData %>% select(PERSON_ID, survTime, DEATH)
+coxData <- left_join(survData, covVar, by= c("PERSON_ID" = "rowId")) 
+head(coxData)
+str(coxData)
+
+coxFit <- coxph(Surv(survData$survTime, survData$DEATH)~group+ageYearCovValue+genderCovariateId, data=coxData)
+coxFit
+
+'
+LDL 값이 작은 그룹은 큰 그룹의 HR의 1.15배이며, 성별이 여성이면 남성의 HR의 0.88배이며, 연령은 한 살 더 먹을 대마다 0.99배가 된다.
+따라서 LDL이 작은 그룹이 큰 그룹에 비해 사망할 확률이 더 높으며,
+남성은 여성에 비해 사망할 확률이 높고
+나이가 먹을 수록 사망할 확률이 낮다고 할 수 있다.
+'
+
+# 심근경색 발생 콕스 분석
+survData2 <- survData2 %>% select(PERSON_ID, survTime, MYOCARDIAL_INFARCTION)
+coxData <- left_join(survData2, covVar, by=c("PERSON_ID" = "rowId"))
+head(coxData)
+str(coxData)
+
+coxFit <- coxph(Surv(survData2$survTime, survData2$MYOCARDIAL_INFARCTION)~group+ageYearCovValue+genderCovariateId, data=coxData)
+coxFit
+'
+LDL 수치 분산이 작은 그룹은 큰 그룹의 HR에 비해 0.812배이며, 성별이 여성이면 남성의 HR에 비해 0.817배이고, 연령은 한 살을 더 먹을 대마다 0.99배가 된다.
+즉, LDL 수치 분산이 작은 그룹은 큰 그룹에 비해 심근경색이 발생할 확률이 더 낮으며,
+여성은 남성에 비해 심근경색이 발생할 확률이 낮고,
+나이는 먹을 수록 심근경색이 발생할 확률이 낮다고 할 수 있다.
+'
